@@ -132,6 +132,8 @@ def download_dataset(reference: str, destination_folder_name: str = None) -> str
         file_name = reference.split("/")[-1]
         try:
             with zipfile.ZipFile(f"{file_name}.zip") as file:
+                if destination_folder_name:
+                    file_name = destination_folder_name
                 if "-" in file_name:
                     file_name = file_name.replace("-", "_")
                 file.extractall(file_name)
