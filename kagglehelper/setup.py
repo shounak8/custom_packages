@@ -1,9 +1,9 @@
 from setuptools import setup
 
 setup(name='kagglehelper',
-version='1.0.1',
+version='1.0.0',
 description='Browse and Download Kaggle Datasets using the helper functions',
-url='https://github.com/shounak8/custom_packages.git',
+url='https://github.com/shounak8/custom_packages/tree/master/kagglehelper',
 author='Shounak Deshpande',
 author_email='shounak.python@gmail.com',
 license='MIT',
