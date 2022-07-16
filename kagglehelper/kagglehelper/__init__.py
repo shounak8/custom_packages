@@ -4,7 +4,9 @@ browse and download datasets"""
 # IMPORTS
 import zipfile
 import os
+import shutil
 import pandas as pd
+
 
 # CONSTANTS
 ROOT_PATH = "/".join(list(os.getcwd().split("\\")[:3]))
@@ -36,13 +38,17 @@ def check_kaggle_cred() -> bool:
     return False
 
 
-def download_competition_dataset(file_name: str = None, cmd_line: str = None) -> str:
+def download_competition_dataset(
+    file_name: str = None, cmd_line: str = None, destination_folder_name: str = None
+) -> str:
     """
     Downloads and Extracts data from Kaggle
 
     Parameters:
         * file_name (str): name of the Kaggle Competition file
         * cmd_line (str): command line/shell input
+        * destination_folder_name (str): name of folder where the
+        date will be extracted
 
     Returns:
         str: Message whether the Competition Dataset is extracted successfully or not
@@ -52,17 +58,22 @@ def download_competition_dataset(file_name: str = None, cmd_line: str = None) ->
             os.popen(cmd_line).read()
             file_name = cmd_line.split()[-1]
         elif file_name:
-            os.popen(KAGGLE_COMPETITION + file_name)
+            os.popen(KAGGLE_COMPETITION + file_name).read()
         else:
             return "Provide file name or command line"
+        zip_src = f"{file_name}.zip"
 
         try:
-            with zipfile.ZipFile(f"{file_name}.zip") as file:
-                if "-" in file_name:
-                    file_name = file_name.replace("-", "_")
-                file.extractall(file_name)
+            with zipfile.ZipFile(zip_src) as file:
+                if not destination_folder_name:
+                    destination_folder_name = file_name
+                if "-" in destination_folder_name:
+                    destination_folder_name = destination_folder_name.replace("-", "_")
+                file.extractall(destination_folder_name)
+            zip_dst = f"{destination_folder_name}/{file_name}.zip"
             cwd = str(os.getcwd()).replace("\\", "/")
-            return f"Dataset Location: {cwd}/{file_name}"
+            shutil.move(src=zip_src, dst=zip_dst)
+            return f"Dataset Folder Path: {cwd}/{destination_folder_name}"
         except FileNotFoundError:
             return "Zip file not downloaded"
     return (
@@ -130,17 +141,19 @@ def download_dataset(reference: str, destination_folder_name: str = None) -> str
     if check_kaggle_cred():
         os.popen(KAGGLE_DOWNLOAD + reference).read()
         file_name = reference.split("/")[-1]
+        zip_src = f"{file_name}.zip"
+
         try:
-            with zipfile.ZipFile(f"{file_name}.zip") as file:
-                if destination_folder_name:
-                    file_name = destination_folder_name
-                if "-" in file_name:
-                    file_name = file_name.replace("-", "_")
-                file.extractall(file_name)
+            with zipfile.ZipFile(zip_src) as file:
+                if not destination_folder_name:
+                    destination_folder_name = file_name
+                if "-" in destination_folder_name:
+                    destination_folder_name = destination_folder_name.replace("-", "_")
+                file.extractall(destination_folder_name)
             cwd = str(os.getcwd()).replace("\\", "/")
-            if destination_folder_name:
-                return f"Dataset Location: {cwd}/{destination_folder_name}"
-            return f"Dataset Location: {cwd}/{file_name}"
+            zip_dst = f"{destination_folder_name}/{file_name}.zip"
+            shutil.move(src=zip_src, dst=zip_dst)
+            return f"Dataset Folder Path: {cwd}/{destination_folder_name}"
         except FileNotFoundError:
             return (
                 "Zip file not downloaded. Make sure the 'reference' "
